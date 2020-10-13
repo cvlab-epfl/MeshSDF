@@ -6,7 +6,7 @@ This is a PyTorch implementation of the NeurIPS'20 SpotLight paper "MeshSDF: Dif
 ## Citing MeshSDF
 
 If you use MeshSDF in your research, please cite the
-[paper](https://arxiv.org/abs/2006.03997):
+[paper](https://arxiv.org/abs/2006.03997) pre-print:
 ```
 @article{remelli2020meshsdf,
   title={MeshSDF: Differentiable Iso-Surface Extraction},
