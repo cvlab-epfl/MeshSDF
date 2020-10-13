@@ -3,10 +3,10 @@
 This is a PyTorch implementation of the NeurIPS'20 SpotLight paper "MeshSDF: Differentiable Iso-Surface Extraction". You can find the paper [here](https://arxiv.org/abs/2006.03997). 
 
 
-## Citing MeshSDF
+## Cite us
 
 If you use MeshSDF in your research, please cite the
-[paper](https://arxiv.org/abs/2006.03997) pre-print:
+[pre-print](https://arxiv.org/abs/2006.03997):
 ```
 @article{remelli2020meshsdf,
   title={MeshSDF: Differentiable Iso-Surface Extraction},
