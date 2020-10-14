@@ -17,7 +17,7 @@ cd MeshSDF
 ## Differentiable iso-surface extraction
 
 We show how to backpropagate gradient information from mesh
-vertices to latent vector while modifying surface mesh topology through a simple toy-experiment, .
+vertices to latent vector while modifying surface mesh topology through a simple toy-experiment.
 
 As an example of a loss function defined on an explicit surface mesh, we consider shilouette
 distance, obtained through [differentiable rasterization](https://hiroharu-kato.com/publication/neural_renderer/).
