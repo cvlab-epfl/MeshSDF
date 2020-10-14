@@ -9,16 +9,9 @@ import torch
 import torch.utils.data
 import pdb
 import imageio
-import matplotlib
 import time
-from scipy.spatial.transform import Rotation as R
 import random
-import torchvision
 import imageio
-from PIL import Image
-import h5py
-import json
-import time
 
 from lib.utils import *
 
