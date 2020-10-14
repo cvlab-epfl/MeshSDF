@@ -222,7 +222,7 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "--resolution",
         dest="resolution",
-        default=512,
+        default=128,
         help="Marching cubes resolution for reconstructed surfaces.",
     )
 
