@@ -29,13 +29,13 @@ To get started, first learn a [Deep Signed Distance Function](https://openaccess
 python train_deep_sdf.py -e experiments/bob_and_spot
 ```
 
-You can then explloit our differentiability result to minimize shilouette distance between spot and bob by running
+You can then explloit our differentiability result to minimize shilouette distance between spot and bob
 
 ```
 python demo_optimizer.py -e experiments/bob_and_spot/
 ```
 
-In our paper, we also propose an heuristic to accelerate iso-surface extraction when performing optimization in an interative fashion. You can do this by running
+In our paper, we also propose an heuristic to accelerate iso-surface extraction when performing optimization in an interative fashion, which results in a noticeable speed-up. You can use our heuristic by running
 
 ```
 python demo_optimizer.py -e experiments/bob_and_spot/ --fast
