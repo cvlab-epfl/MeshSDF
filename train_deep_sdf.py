@@ -201,7 +201,7 @@ def main_function(experiment_directory, resolution):
         mesh_filename = get_mesh_filename(reconstruction_dir, name[0])
         logging.info("Reconstructing {}...".format(mesh_filename))
         with torch.no_grad():
-            create_mesh(decoder, latent, mesh_filename, N=resolution, output_mesh = False, filename = mesh_filename)
+            create_mesh(decoder, latent, N=resolution, output_mesh = False, filename = mesh_filename)
 
     logging.info("Done!")
 
