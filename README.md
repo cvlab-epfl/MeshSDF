@@ -2,6 +2,8 @@
 
 This is a PyTorch implementation of the NeurIPS'20 SpotLight paper "MeshSDF: Differentiable Iso-Surface Extraction". You can find the paper [here](https://arxiv.org/abs/2006.03997). 
 
+![](experiments/bob_and_spot/Optimizations/movie.gif)
+
 
 ## Cite us
 
