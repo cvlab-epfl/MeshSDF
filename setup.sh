@@ -4,4 +4,6 @@ pip --no-cache-dir install \
   torch \
   torchvision \
 	trimesh \
-	neural_renderer_pytorch
+	neural_renderer_pytorch \
+	psutil \
+	imageio
