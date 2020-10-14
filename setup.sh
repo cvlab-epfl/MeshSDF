@@ -3,7 +3,11 @@ pip --no-cache-dir install \
 	plotly \
   torch \
   torchvision \
+	logging \
+	pdb \
+	glob \
 	trimesh \
-	neural_renderer_pytorch \
+	plyfile \
 	psutil \
-	imageio
+	imageio \
+	neural_renderer_pytorch \
