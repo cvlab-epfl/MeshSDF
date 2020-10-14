@@ -4,7 +4,6 @@ pip --no-cache-dir install \
 	plotly \
   torch \
   torchvision \
-	pdb \
 	glob \
 	trimesh \
 	plyfile \
