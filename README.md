@@ -23,7 +23,7 @@ As an example of a loss function defined on an explicit surface mesh, we conside
 distance, obtained through [differentiable rasterization](https://hiroharu-kato.com/publication/neural_renderer/).
 For this experiment, we consider a dataset consisting of two shapes, bob, a genus-1 rubber duck, and spot, a genus-0 cow.
 
-To get started, first learn a [Deep Signed Distance Function](https://openaccess.thecvf.com/content_CVPR_2019/html/Park_DeepSDF_Learning_Continuous_Signed_Distance_Functions_for_Shape_Representation_CVPR_2019_paper.html) representation for this dataset by running
+To get started, first learn a [deep signed distance function](https://openaccess.thecvf.com/content_CVPR_2019/html/Park_DeepSDF_Learning_Continuous_Signed_Distance_Functions_for_Shape_Representation_CVPR_2019_paper.html) representation for this dataset by running
 
 ```
 python train_deep_sdf.py -e experiments/bob_and_spot
