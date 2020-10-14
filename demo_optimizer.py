@@ -40,7 +40,7 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "--iters",
         dest="iterations",
-        default=200,
+        default=100,
         help="The number of latent code optimization iterations to perform.",
     )
     arg_parser.add_argument(
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "--image_resolution",
         dest="image_resolution",
-        default=256,
+        default=512,
         help="Image resolution for differentiable rendering.",
     )
     arg_parser.add_argument("--fast", default=False, action="store_true" , help="Run faster iso-surface extraction algorithm presented in main paper.")
