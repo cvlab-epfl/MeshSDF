@@ -4,8 +4,4 @@ pip --no-cache-dir install \
   torch \
   torchvision \
 	trimesh \
-	'git+https://github.com/facebookresearch/pytorch3d.git'
-
-mkdir external && cd external
-git clone https://github.com/daniilidis-group/neural_renderer.git
-cd neural_renderer && python setup.py install --user && cd ../
+	neural_renderer_pytorch
