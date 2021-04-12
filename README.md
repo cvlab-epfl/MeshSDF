@@ -6,7 +6,7 @@ This is a PyTorch implementation of the NeurIPS'20 SpotLight paper "MeshSDF: Dif
 
 ## Installation
 
-To get started, simply clone the repo and run the setup bash script, which will take care of installing all packages and dependencies.
+To get started, simply clone the repo and run the setup bash script, which will take care of installing all packages/ dependencies and download data.
 
 ```
 git clone https://github.com/edoRemelli/MeshSDF.git
@@ -14,20 +14,25 @@ cd MeshSDF
 ./setup.sh
 ```
 
-## Data preparation
+## Data
 
 In our project, we store data according to the following structure:
 ```
 data/
   <dataset_name>/
-      Samples/
+      samples/
           <instance_name>.npz
-      Meshes/
-          <instance_name>/
-              isosurf.obj
+      meshes/
+          <instance_name>.obj
+      renders/
+          <instance_name>.obj
 ```
+
+We provide pre-processed and subsampled [ShapeNet](https://www.shapenet.org) data for cars and chairs to get you started. You should have downloaded it when running the setup script.
+
 Below we detail how to obtain and pre-process the ShapeNet data we used in our project.
-Refer to data/cars_demo for an example of how a dataset folder should look like.
+Do not forget to cite the authors of the respective papers if you find this data useful for your research.
+
 
 ### Mesh data
 
@@ -36,6 +41,11 @@ We use data from [ShapeNetCore.v1](https://www.shapenet.org). Specifically, we u
 ### SDF data
 
 Once you have downloaded cleaned ShapeNetCore.v1 models, we generate SDF training data using the pre-processing script from [DeepSDF](https://openaccess.thecvf.com/content_CVPR_2019/html/Park_DeepSDF_Learning_Continuous_Signed_Distance_Functions_for_Shape_Representation_CVPR_2019_paper.html). Please refer to their repo for more info on how to generate SDF samples.
+
+### Image data
+
+We use rendered ShapeNetCore.v1 models from [DISN](https://github.com/laughtervv/DISN). Please refer to their repo for more info on how to generate synthetic renders.
+
 
 
 ## Differentiable iso-surface extraction
@@ -53,13 +63,13 @@ To get started, first learn a [deep signed distance function](https://openaccess
 python train_deep_sdf.py -e experiments/bob_and_spot
 ```
 
-You can then explloit our differentiability result to minimize shilouette distance between spot and bob
+You can then exploit our differentiability result to minimize silhouette distance between spot and bob
 
 ```
 python demo_optimizer.py -e experiments/bob_and_spot/
 ```
 
-In our paper, we also propose an heuristic to accelerate iso-surface extraction when performing optimization in an interative fashion, which results in a noticeable speed-up. You can use our heuristic by running
+In our paper, we also propose an heuristic to accelerate iso-surface extraction when performing optimization in an iterative fashion, which results in a noticeable speed-up. You can use our heuristic by running
 
 ```
 python demo_optimizer.py -e experiments/bob_and_spot/ --fast
