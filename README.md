@@ -9,7 +9,7 @@ This is a PyTorch implementation of the NeurIPS'20 SpotLight paper "MeshSDF: Dif
 To get started, simply clone the repo and run the setup bash script, which will take care of installing all packages/ dependencies and download data.
 
 ```
-git clone https://github.com/edoRemelli/MeshSDF.git
+git clone https://github.com/cvlab-epfl/MeshSDF.git
 cd MeshSDF
 ./setup.sh
 ```
