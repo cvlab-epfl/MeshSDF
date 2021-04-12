@@ -16,52 +16,6 @@ import imageio
 from lib.utils import *
 
 
-def get_instance_filenames(data_source, split):
-    npzfiles = []
-    for dataset in split:
-        for class_name in split[dataset]:
-            for instance_name in split[dataset][class_name]:
-                instance_filename = os.path.join(
-                    dataset, class_name, instance_name + ".npz"
-                )
-                if not os.path.isfile(
-                    os.path.join(data_source, instance_filename)
-                ):
-                    logging.warning(
-                        "Requested non-existent file '{}'".format(instance_filename)
-                    )
-                npzfiles += [instance_filename]
-    return npzfiles
-
-
-def remove_nans(tensor):
-    tensor_nan = torch.isnan(tensor[:, 3])
-    return tensor[~tensor_nan, :]
-
-
-def unpack_sdf_samples(filename, subsample=None):
-
-    npz = np.load(filename)
-    if subsample is None:
-        return npz
-
-    pos_tensor = remove_nans(torch.from_numpy(npz["pos"].astype(float)))
-    neg_tensor = remove_nans(torch.from_numpy(npz["neg"].astype(float)))
-
-    # split the sample into half
-    half = int(subsample / 2)
-
-    random_pos = (torch.rand(half).cpu() * pos_tensor.shape[0]).long()
-    random_neg = (torch.rand(half).cpu() * neg_tensor.shape[0]).long()
-
-    sample_pos = torch.index_select(pos_tensor, 0, random_pos)
-    sample_neg = torch.index_select(neg_tensor, 0, random_neg)
-
-    samples = torch.cat([sample_pos, sample_neg], 0).float()
-
-    return samples
-
-
 class SDFSamples(torch.utils.data.Dataset):
     def __init__(
         self,
@@ -82,3 +36,51 @@ class SDFSamples(torch.utils.data.Dataset):
             self.data_source, self.npyfiles[idx]
         )
         return unpack_sdf_samples(filename, self.subsample), idx, self.npyfiles[idx]
+
+
+class RGBA2SDF(torch.utils.data.Dataset):
+    def __init__(
+        self,
+        data_source,
+        split,
+        subsample,
+        is_train=False,
+        num_views = 1,
+    ):
+        self.subsample = subsample
+        self.is_train = is_train
+        self.data_source = data_source
+        self.num_views = num_views
+        self.npyfiles =  get_instance_filenames(data_source, split)
+
+    def __len__(self):
+        return len(self.npyfiles)
+
+    def __getitem__(self, idx):
+
+        mesh_name = self.npyfiles[idx].split(".npz")[0]
+
+        # fetch sdf samples
+        sdf_filename = os.path.join(
+            self.data_source, self.npyfiles[idx]
+        )
+        sdf_samples = unpack_sdf_samples(sdf_filename,  self.subsample)
+
+        if self.is_train:
+            # reset seed for random sampling training data (see https://github.com/pytorch/pytorch/issues/5059)
+            np.random.seed( int(time.time()) + idx)
+            id = np.random.randint(0, self.num_views)
+        else:
+            np.random.seed(idx)
+            id = np.random.randint(0, self.num_views)
+
+        view_id = '{0:02d}'.format(id)
+
+        image_filename = os.path.join(self.data_source, mesh_name.replace("samples", "renders"), view_id + ".png")
+        RGBA = unpack_images(image_filename)
+
+        # fetch cameras
+        metadata_filename = os.path.join(self.data_source, mesh_name.replace("samples", "renders"), "rendering_metadata.txt")
+        intrinsic, extrinsic = get_camera_matrices(metadata_filename, id)
+
+        return sdf_samples, RGBA, intrinsic, extrinsic, mesh_name
