@@ -25,10 +25,14 @@ data/
       meshes/
           <instance_name>.obj
       renders/
-          <instance_name>.obj
+          <instance_name>/
+              0000.png
+              ...
+              metadata.txt
+
 ```
 
-We provide pre-processed and subsampled ShapeNet data for [cars](https://drive.google.com/file/d/1KCnZjWUuQQSGjc2C_Z0_j4IFBYmZ8GvG/view?usp=sharing) and [chairs](https://drive.google.com/file/d/1I05H7X8__jKak8OdwXPu7cD7BOF8mfa8/view?usp=sharing) to get you started. Simply download it and unzip it in the data/ folder to get going.
+We provide pre-processed and subsampled ShapeNet data for [cars](https://drive.google.com/file/d/1KCnZjWUuQQSGjc2C_Z0_j4IFBYmZ8GvG/view?usp=sharing) and [chairs](https://drive.google.com/file/d/1I05H7X8__jKak8OdwXPu7cD7BOF8mfa8/view?usp=sharing) to get you started. Simply download it and unzip it in the `data/` folder to get going.
 
 In case you are interested in using different data, below we detail how to obtain and pre-process the ShapeNet data we used in our project.
 Do not forget to cite the authors of the respective papers if you find this data useful for your research.
@@ -81,6 +85,7 @@ Once you have downloaded data, you can train a SVR model for cars by running
 ```
 python train_svr.py -e experiments/cars_svr
 ```
+
 
 
 
