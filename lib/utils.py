@@ -9,6 +9,98 @@ import lib.workspace as ws
 import numpy as np
 import imageio
 
+def compute_normal_consistency(gt_normal, pred_normal):
+    """
+    This function computes a symmetric chamfer distance, i.e. the sum of both chamfers.
+
+    gt_points: trimesh.points.PointCloud of just poins, sampled from the surface (see
+               compute_metrics.ply for more documentation)
+
+    gen_mesh: trimesh.base.Trimesh of output mesh from whichever autoencoding reconstruction
+              method (see compute_metrics.py for more)
+
+    """
+    gt_normal_np = gt_normal.float().detach().cpu().numpy()[0]
+    gt_mask_np = (gt_normal[...,0]>0).float().detach().cpu().numpy()[0]
+
+    pred_normal_np = pred_normal.float().detach().cpu().numpy()[0]
+    pred_mask_np = (pred_normal[...,0]>0).float().detach().cpu().numpy()[0]
+
+    # take valid intersection
+    inner_mask = (gt_mask_np * pred_mask_np).astype(bool)
+
+    gt_vecs = 2*gt_normal_np[inner_mask]-1
+    pred_vecs = 2*pred_normal_np[inner_mask]-1
+    metric = np.mean(np.sum(gt_vecs*pred_vecs, 1))
+
+    return metric
+
+class Renderer(torch.nn.Module):
+    def __init__(self, silhouette_renderer, depth_renderer, max_depth = 5, image_size=256):
+        super().__init__()
+        self.silhouette_renderer = silhouette_renderer
+        self.depth_renderer = depth_renderer
+
+        self.max_depth = max_depth
+
+        # sobel filters
+        with torch.no_grad():
+            if torch.cuda.is_available():
+                self.device = torch.device("cuda:0")
+                torch.cuda.set_device(self.device)
+            else:
+                self.device = torch.device("cpu")
+
+        # Pixel coordinates
+        self.X, self.Y = torch.meshgrid(torch.arange(0, image_size), torch.arange(0, image_size))
+        self.X = (2*(0.5 + self.X.unsqueeze(0).unsqueeze(-1))/image_size - 1).float().cuda()
+        self.Y = (2*(0.5 + self.Y.unsqueeze(0).unsqueeze(-1))/image_size - 1).float().cuda()
+
+    def depth_2_normal(self, depth, depth_unvalid, cameras):
+
+        B, H, W, C = depth.shape
+
+        grad_out = torch.zeros(B, H, W, 3).cuda()
+        # Pixel coordinates
+        xy_depth = torch.cat([self.X, self.Y, depth], 3).cuda().reshape(B,-1, 3)
+        xyz_unproj = cameras.unproject_points(xy_depth, world_coordinates=False)
+
+        # compute tangent vectors
+        XYZ_camera = xyz_unproj.reshape(B, H, W, 3)
+        vx = XYZ_camera[:,1:-1,2:,:]-XYZ_camera[:,1:-1,1:-1,:]
+        vy = XYZ_camera[:,2:,1:-1,:]-XYZ_camera[:,1:-1,1:-1,:]
+
+        # finally compute cross product
+        normal = torch.cross(vx.reshape(-1, 3),vy.reshape(-1, 3))
+        normal_norm = normal.norm(p=2, dim=1, keepdim=True)
+
+        normal_normalized = normal.div(normal_norm)
+        # reshape to image
+        normal_out = normal_normalized.reshape(B, H-2, W-2, 3)
+        grad_out[:,1:-1,1:-1,:] = (0.5 - 0.5*normal_out)
+
+        # zero out +Inf
+        grad_out[depth_unvalid] = 0.0
+
+        return grad_out
+
+    def forward(self, meshes_world, **kwargs) -> torch.Tensor:
+        # take care of soft silhouette
+        silhouette_ref = self.silhouette_renderer(meshes_world=meshes_world, **kwargs)
+        silhouette_out = silhouette_ref[..., 3]
+
+        # now get depth out
+        depth_ref = self.depth_renderer(meshes_world=meshes_world, **kwargs)
+        depth_ref = depth_ref.zbuf[...,0].unsqueeze(-1)
+        depth_unvalid = depth_ref<0
+        depth_ref[depth_unvalid] = self.max_depth
+        depth_out = depth_ref[..., 0]
+
+        # post process depth to get normals, contours
+        normals_out = self.depth_2_normal(depth_ref, depth_unvalid.squeeze(-1), kwargs['cameras'])
+
+        return normals_out, silhouette_out
+
 def process_image(images_out, alpha_out):
     image_out_export = 255*images_out.detach().cpu().numpy()[0].transpose((1, 2, 0))  # [image_size, image_size, RGB]
     alpha_out_export = 255*alpha_out.detach().cpu().numpy()[0]
@@ -248,49 +340,6 @@ def fourier_transform(x, L=5):
     sines = torch.cat([torch.sin(2**l*3.1415*x) for l in range(L)], -1)
     transformed_x = torch.cat((cosines,sines),-1)
     return transformed_x
-
-
-def add_common_args(arg_parser):
-    arg_parser.add_argument(
-        "--debug",
-        dest="debug",
-        default=False,
-        action="store_true",
-        help="If set, debugging messages will be printed",
-    )
-    arg_parser.add_argument(
-        "--quiet",
-        "-q",
-        dest="quiet",
-        default=False,
-        action="store_true",
-        help="If set, only warnings will be printed",
-    )
-    arg_parser.add_argument(
-        "--log",
-        dest="logfile",
-        default=None,
-        help="If set, the log will be saved using the specified filename.",
-    )
-
-
-def configure_logging(args):
-    logger = logging.getLogger()
-    if args.debug:
-        logger.setLevel(logging.DEBUG)
-    elif args.quiet:
-        logger.setLevel(logging.WARNING)
-    else:
-        logger.setLevel(logging.INFO)
-    logger_handler = logging.StreamHandler()
-    formatter = logging.Formatter("MeshSdf - %(levelname)s - %(message)s")
-    logger_handler.setFormatter(formatter)
-    logger.addHandler(logger_handler)
-
-    if args.logfile is not None:
-        file_logger_handler = logging.FileHandler(args.logfile)
-        file_logger_handler.setFormatter(formatter)
-        logger.addHandler(file_logger_handler)
 
 
 def decode_sdf(decoder, latent_vector, queries):

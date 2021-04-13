@@ -26,13 +26,14 @@ data/
           <instance_name>.obj
       renders/
           <instance_name>/
-              0000.png
+              00.png
               ...
-              metadata.txt
+              rendering_metadata.txt
 
 ```
 
-We provide pre-processed and subsampled ShapeNet data for [cars](https://drive.google.com/file/d/1KCnZjWUuQQSGjc2C_Z0_j4IFBYmZ8GvG/view?usp=sharing) and [chairs](https://drive.google.com/file/d/1I05H7X8__jKak8OdwXPu7cD7BOF8mfa8/view?usp=sharing) to get you started. Simply download it and unzip it in the `data/` folder to get going.
+We provide pre-processed and subsampled ShapeNet data for [cars](https://drive.google.com/file/d/1KCnZjWUuQQSGjc2C_Z0_j4IFBYmZ8GvG/view?usp=sharing) and [chairs](https://drive.google.com/file/d/1I05H7X8__jKak8OdwXPu7cD7BOF8mfa8/view?usp=sharing) to get you started.
+Simply download it and unzip it in the `data/` folder to get going.
 
 In case you are interested in using different data, below we detail how to obtain and pre-process the ShapeNet data we used in our project.
 Do not forget to cite the authors of the respective papers if you find this data useful for your research.
@@ -56,7 +57,7 @@ We use rendered ShapeNetCore.v1 models from [DISN](https://github.com/laughtervv
 We show how to backpropagate gradient information from mesh
 vertices to latent vector while modifying surface mesh topology through a simple toy-experiment.
 
-As an example of a loss function defined on an explicit surface mesh, we consider shilouette
+As an example of a loss function defined on an explicit surface mesh, we consider silhouette
 distance, obtained through [differentiable rasterization](https://hiroharu-kato.com/publication/neural_renderer/).
 For this experiment, we consider a dataset consisting of two shapes, bob, a genus-1 rubber duck, and spot, a genus-0 cow.
 
@@ -80,13 +81,23 @@ python demo_optimizer.py -e experiments/bob_and_spot/ --fast
 
 ## Single-view reconstruction
 
-Once you have downloaded data, you can train a SVR model for cars by running
+You can train a SVR model for cars by running
 
 ```
 python train_svr.py -e experiments/cars_svr
 ```
 
+Once the model is trained, you can run silhouette based refinement, as presented in our work, by running
 
+```
+python reconstruct_svr.py -e experiments/cars_svr/
+```
+
+Finally, to gather results and compute metrics, run
+
+```
+python metrics_svr.py -e experiments/cars_svr/
+```
 
 
 ## Cite us

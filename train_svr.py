@@ -5,7 +5,6 @@ import torch.utils.data as data_utils
 import signal
 import sys
 import os
-import logging
 import json
 import pdb
 import numpy as np
@@ -69,18 +68,16 @@ def clip_logs(loss_sdf_log,loss_regl_log,loss_sdf_test_log,loss_regl_test_log, l
 
 def main_function(experiment_directory, continue_from):
 
-    logging.debug("running " + experiment_directory)
-
     specs = ws.load_experiment_specifications(experiment_directory)
 
-    logging.info("Experiment description: \n" + ' '.join([str(elem) for elem in specs["Description"]]))
+    print("Experiment description: \n" + ' '.join([str(elem) for elem in specs["Description"]]))
 
     data_source = specs["DataSource"]
     train_split_file = specs["TrainSplit"]
     test_split_file = specs["TestSplit"]
 
     arch_encoder = __import__("lib.models." + specs["NetworkEncoder"], fromlist=["ResNet"])
-    arch_decoder = __import__("lib.models." + specs["NetworkDecoder"], fromlist=["PerceptualDecoderv2, DecoderCamera"])
+    arch_decoder = __import__("lib.models." + specs["NetworkDecoder"], fromlist=["DeepSDF"])
     latent_size = specs["CodeLength"]
 
     checkpoints = list(
@@ -98,8 +95,6 @@ def main_function(experiment_directory, continue_from):
     lr_schedules = get_learning_rate_schedules(specs)
 
     grad_clip = get_spec_with_default(specs, "GradientClipNorm", None)
-    if grad_clip is not None:
-        logging.debug("clipping gradients to max norm {}".format(grad_clip))
 
     def save_latest(epoch):
         save_model(experiment_directory, "encoder_latest.pth", encoder, epoch)
@@ -112,7 +107,7 @@ def main_function(experiment_directory, continue_from):
         save_optimizer(experiment_directory, str(epoch) + ".pth", optimizer_all, epoch)
 
     def signal_handler(sig, frame):
-        logging.info("Stopping early...")
+        print("Stopping early...")
         sys.exit(0)
 
     def adjust_learning_rate(lr_schedules, optimizer, epoch):
@@ -134,10 +129,10 @@ def main_function(experiment_directory, continue_from):
     encoder = arch_encoder.ResNet(latent_size, specs["Depth"], norm_type = specs["NormType"]).cuda()
     decoder = arch_decoder.DeepSDF(latent_size, **specs["NetworkSpecs"]).cuda()
 
-    logging.info(encoder)
-    logging.info(decoder)
+    print(encoder)
+    print(decoder)
 
-    logging.info("training with {} GPU(s)".format(torch.cuda.device_count()))
+    print("training with {} GPU(s)".format(torch.cuda.device_count()))
 
     encoder = torch.nn.DataParallel(encoder)
     decoder = torch.nn.DataParallel(decoder)
@@ -152,7 +147,7 @@ def main_function(experiment_directory, continue_from):
 
 
     num_data_loader_threads = get_spec_with_default(specs, "DataLoaderThreads", 16)
-    logging.info("loading data with {} threads".format(num_data_loader_threads))
+    print("loading data with {} threads".format(num_data_loader_threads))
 
     sdf_dataset = lib.data.RGBA2SDF(
         data_source, train_split, num_samp_per_scene, is_train=True, num_views = specs["NumberOfViews"]
@@ -176,8 +171,8 @@ def main_function(experiment_directory, continue_from):
         drop_last=True,
     )
 
-    logging.info("There are {} training samples".format(len(sdf_dataset)))
-    logging.info("There are {} test samples".format(len(sdf_dataset_test)))
+    print("There are {} training samples".format(len(sdf_dataset)))
+    print("There are {} test samples".format(len(sdf_dataset_test)))
 
 
     loss_l1 = torch.nn.L1Loss(reduction="sum")
@@ -201,7 +196,7 @@ def main_function(experiment_directory, continue_from):
 
     if continue_from is not None:
 
-        logging.info('continuing from "{}"'.format(continue_from))
+        print('continuing from "{}"'.format(continue_from))
 
 
         model_epoch = ws.load_model_parameters(
@@ -226,14 +221,14 @@ def main_function(experiment_directory, continue_from):
         start_epoch = model_epoch + 1
 
 
-    logging.info("starting from epoch {}".format(start_epoch))
+    print("starting from epoch {}".format(start_epoch))
 
-    logging.info(
+    print(
         "Number of encoder parameters: {}".format(
             sum(p.data.nelement() for p in encoder.parameters() if p.requires_grad)
         )
     )
-    logging.info(
+    print(
         "Number of decoder parameters: {}".format(
             sum(p.data.nelement() for p in decoder.parameters() if p.requires_grad)
         )
@@ -241,7 +236,7 @@ def main_function(experiment_directory, continue_from):
 
     for epoch in range(start_epoch, num_epochs + 1):
 
-        logging.info("epoch {}...".format(epoch))
+        print("epoch {}...".format(epoch))
 
         decoder.train()
         encoder.train()
@@ -361,7 +356,5 @@ if __name__ == "__main__":
         + "an epochal snapshot.",
     )
 
-    lib.add_common_args(arg_parser)
     args = arg_parser.parse_args()
-    lib.configure_logging(args)
     main_function(args.experiment_directory, args.continue_from)

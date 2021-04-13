@@ -50,6 +50,10 @@ def convert_sdf_samples_to_ply(
         mesh_points = mesh_points - offset
 
     # try writing to the ply file
+    write_verts_faces_to_file(verts, faces, ply_filename_out)
+    
+
+def write_verts_faces_to_file(verts, faces, ply_filename_out):
 
     num_verts = verts.shape[0]
     num_faces = faces.shape[0]
@@ -57,7 +61,7 @@ def convert_sdf_samples_to_ply(
     verts_tuple = np.zeros((num_verts,), dtype=[("x", "f4"), ("y", "f4"), ("z", "f4")])
 
     for i in range(0, num_verts):
-        verts_tuple[i] = tuple(mesh_points[i, :])
+        verts_tuple[i] = tuple(verts[i, :])
 
     faces_building = []
     for i in range(0, num_faces):
@@ -70,12 +74,6 @@ def convert_sdf_samples_to_ply(
     ply_data = plyfile.PlyData([el_verts, el_faces])
     logging.debug("saving mesh to %s" % (ply_filename_out))
     ply_data.write(ply_filename_out)
-
-    logging.debug(
-        "converting to ply format and writing to file took {} s".format(
-            time.time() - start_time
-        )
-    )
 
 
 def convert_sdf_samples_to_mesh(

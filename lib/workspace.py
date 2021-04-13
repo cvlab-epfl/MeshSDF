@@ -10,8 +10,6 @@ optimizer_params_subdir = "OptimizerParameters"
 latent_codes_subdir = "LatentCodes"
 logs_filename = "Logs.pth"
 reconstructions_subdir = "Reconstructions"
-reconstruction_meshes_subdir = "Meshes"
-reconstruction_codes_subdir = "Codes"
 optimizations_subdir = "Optimizations"
 optimizations_meshes_subdir = "Meshes"
 optimizations_codes_subdir = "Codes"
@@ -61,20 +59,6 @@ def load_model_parameters(experiment_directory, checkpoint, decoder):
 
     return data["epoch"]
 
-def load_model_parameters_og(experiment_directory, checkpoint, decoder):
-
-    filename = os.path.join(
-        experiment_directory, model_params_subdir, checkpoint + ".pth"
-    )
-
-    if not os.path.isfile(filename):
-        raise Exception('model state dict "{}" does not exist'.format(filename))
-
-    data = torch.load(filename)
-
-    decoder.load_state_dict(data["model_state_dict"])
-
-    return data["epoch"]
 
 def load_model_parameters(experiment_directory, checkpoint, encoder, decoder):
 
@@ -98,27 +82,7 @@ def load_model_parameters(experiment_directory, checkpoint, encoder, decoder):
 
     return data["epoch"]
 
-def load_model_parameters_pretrained(experiment_directory, checkpoint, encoder, decoder):
 
-    filename = os.path.join(
-        experiment_directory, model_params_subdir, "pretrained_encoder_" + checkpoint + ".pth"
-    )
-    if not os.path.isfile(filename):
-        raise Exception('model state dict "{}" does not exist'.format(filename))
-
-    data = torch.load(filename)
-    encoder.load_state_dict(data["model_state_dict"])
-
-    filename = os.path.join(
-        experiment_directory, model_params_subdir, "pretrained_decoder_" + checkpoint + ".pth"
-    )
-    if not os.path.isfile(filename):
-        raise Exception('model state dict "{}" does not exist'.format(filename))
-
-    data = torch.load(filename)
-    decoder.load_state_dict(data["model_state_dict"])
-
-    return data["epoch"]
 
 
 def build_decoder(experiment_directory, experiment_specs):

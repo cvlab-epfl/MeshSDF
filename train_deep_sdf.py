@@ -6,7 +6,6 @@ import torch.utils.data as data_utils
 import signal
 import sys
 import os
-import logging
 import math
 import json
 import pdb
@@ -23,7 +22,7 @@ def main_function(experiment_directory, resolution):
 
     specs = load_experiment_specifications(experiment_directory)
 
-    logging.info("Experiment description: \n" + ' '.join([str(elem) for elem in specs["Description"]]))
+    print("Experiment description: \n" + ' '.join([str(elem) for elem in specs["Description"]]))
 
     data_source = specs["DataSource"]
     train_split_file = specs["TrainSplit"]
@@ -39,7 +38,7 @@ def main_function(experiment_directory, resolution):
         save_latent_vectors(experiment_directory, "latest.pth", lat_vecs, epoch)
 
     def signal_handler(sig, frame):
-        logging.info("Stopping early...")
+        print("Stopping early...")
         sys.exit(0)
 
     def adjust_learning_rate(lr_schedules, optimizer, epoch):
@@ -62,7 +61,7 @@ def main_function(experiment_directory, resolution):
     code_bound = get_spec_with_default(specs, "CodeBound", None)
     decoder = DeepSDF(latent_size, **specs["NetworkSpecs"]).cuda()
 
-    logging.info("training with {} GPU(s)".format(torch.cuda.device_count()))
+    print("training with {} GPU(s)".format(torch.cuda.device_count()))
     decoder = torch.nn.DataParallel(decoder)
 
     num_epochs = specs["NumEpochs"]
@@ -74,7 +73,7 @@ def main_function(experiment_directory, resolution):
     sdf_dataset = lib.data.SDFSamples(data_source, train_split, num_samp_per_scene)
 
     num_data_loader_threads = get_spec_with_default(specs, "DataLoaderThreads", 1)
-    logging.info("loading data with {} threads".format(num_data_loader_threads))
+    print("loading data with {} threads".format(num_data_loader_threads))
 
     sdf_loader = data_utils.DataLoader(
         sdf_dataset,
@@ -94,9 +93,8 @@ def main_function(experiment_directory, resolution):
 
     num_scenes = len(sdf_dataset)
 
-    logging.info("There are {} scenes".format(num_scenes))
-
-    logging.info(decoder)
+    print("There are {} scenes".format(num_scenes))
+    print(decoder)
 
     lat_vecs = torch.nn.Embedding(num_scenes, latent_size).cuda()
     torch.nn.init.normal_(
@@ -124,13 +122,13 @@ def main_function(experiment_directory, resolution):
 
     start_epoch = 1
 
-    logging.info("starting from epoch {}".format(start_epoch))
-    logging.info(
+    print("starting from epoch {}".format(start_epoch))
+    print(
         "Number of decoder parameters: {}".format(
             sum(p.data.nelement() for p in decoder.parameters())
         )
     )
-    logging.info(
+    print(
         "Number of shape code parameters: {} (# codes {}, code dim {})".format(
             lat_vecs.num_embeddings * lat_vecs.embedding_dim,
             lat_vecs.num_embeddings,
@@ -182,7 +180,7 @@ def main_function(experiment_directory, resolution):
 
             optimizer_all.step()
 
-        logging.info("epoch {}...".format(epoch))
+        print("epoch {}...".format(epoch))
 
         if epoch % log_frequency == 0:
             save_latest(epoch)
@@ -198,11 +196,11 @@ def main_function(experiment_directory, resolution):
     for sdf_data, indices, name in sdf_loader_reconstruction:
         latent = lat_vecs(indices.cuda()).squeeze(0)
         mesh_filename = get_mesh_filename(reconstruction_dir, name[0])
-        logging.info("Reconstructing {}...".format(mesh_filename))
+        print("Reconstructing {}...".format(mesh_filename))
         with torch.no_grad():
             create_mesh(decoder, latent, N=resolution, output_mesh = False, filename = mesh_filename)
 
-    logging.info("Done!")
+    print("Done!")
 
 if __name__ == "__main__":
 
@@ -224,11 +222,5 @@ if __name__ == "__main__":
         default=128,
         help="Marching cubes resolution for reconstructed surfaces.",
     )
-
-    lib.add_common_args(arg_parser)
-
     args = arg_parser.parse_args()
-
-    lib.configure_logging(args)
-
     main_function(args.experiment_directory, args.resolution)
