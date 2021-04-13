@@ -84,7 +84,7 @@ python demo_optimizer.py -e experiments/bob_and_spot/ --fast
 You can train a SVR model for cars by running
 
 ```
-python train_svr.py -e experiments/cars_svr
+python train_svr.py -e experiments/cars_svr/
 ```
 
 Once the model is trained, you can run silhouette based refinement, as presented in our work, by running
