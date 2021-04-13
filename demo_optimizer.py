@@ -2,7 +2,6 @@
 
 import argparse
 import json
-import logging
 import os
 import random
 import time
@@ -55,11 +54,7 @@ if __name__ == "__main__":
         help="Image resolution for differentiable rendering.",
     )
     arg_parser.add_argument("--fast", default=False, action="store_true" , help="Run faster iso-surface extraction algorithm presented in main paper.")
-
-    lib.add_common_args(arg_parser)
     args = arg_parser.parse_args()
-    lib.configure_logging(args)
-
 
     specs_filename = os.path.join(args.experiment_directory, "specs.json")
 
@@ -83,7 +78,7 @@ if __name__ == "__main__":
     saved_model_epoch = saved_model_state["epoch"]
     decoder.load_state_dict(saved_model_state["model_state_dict"])
     decoder = decoder.module.cuda()
-    logging.info(decoder)
+    print(decoder)
 
     optimization_meshes_dir = os.path.join(
         args.experiment_directory, optimizations_subdir
@@ -145,7 +140,7 @@ if __name__ == "__main__":
     adjust_lr_every = 500
     optimizer = torch.optim.Adam([latent_init], lr=lr)
 
-    logging.info("Starting optimization:")
+    print("Starting optimization:")
     decoder.eval()
     best_loss = None
     sigma = None
@@ -173,7 +168,7 @@ if __name__ == "__main__":
         images_out, depth_out, silhouette_out = renderer(xyz_upstream.unsqueeze(0), faces_upstream.unsqueeze(0), textures_dr.unsqueeze(0))
 
         loss = torch.mean((silhouette_out-tgt_silhouette_out)**2)
-        logging.info("Loss at iter {}:".format(e) + ": {}".format(loss.detach().cpu().numpy()))
+        print("Loss at iter {}:".format(e) + ": {}".format(loss.detach().cpu().numpy()))
 
         # now store upstream gradients
         loss.backward()
@@ -218,7 +213,7 @@ if __name__ == "__main__":
         images_out, depth_out, alpha_out = renderer(verts_dr, faces_dr, textures_dr)
         images.append(process_image(images_out, alpha_out))
 
-    logging.info("Optimization completed, storing GIF...")
+    print("Optimization completed, storing GIF...")
     gif_filename = os.path.join(optimization_meshes_dir, "movie.gif")
     imageio.mimsave(gif_filename, images)
-    logging.info("Done.")
+    print("Done.")

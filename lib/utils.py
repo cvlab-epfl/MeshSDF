@@ -529,8 +529,8 @@ def get_projection(az, el, distance, focal_length=35, img_w=256, img_h=256, sens
                                           (0, ce, -se),
                                           (0, se, ce))))
     # fix up camera
-    se = np.sin(np.radians(90))
-    ce = np.cos(np.radians(90))
+    se = np.sin(np.radians(180))
+    ce = np.cos(np.radians(180))
     R_cam = np.transpose(np.matrix(((ce, -se, 0),
                                           (se, ce, 0),
                                           (0, 0, 1))))
