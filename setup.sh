@@ -8,8 +8,9 @@ pip --no-cache-dir install \
 	psutil \
 	imageio \
 	neural_renderer_pytorch \
-	gdown \
 	--user
 
-cd data
-gdown https://drive.google.com/file/d/1KCnZjWUuQQSGjc2C_Z0_j4IFBYmZ8GvG/view?usp=sharing
+curl -LO https://github.com/NVIDIA/cub/archive/1.10.0.tar.gz
+tar xzf 1.10.0.tar.gz
+export CUB_HOME=$PWD/cub-1.10.0
+pip install "git+https://github.com/facebookresearch/pytorch3d.git@stable"
