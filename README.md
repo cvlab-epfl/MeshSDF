@@ -6,7 +6,7 @@ This is a PyTorch implementation of the NeurIPS'20 SpotLight paper "MeshSDF: Dif
 
 ## Installation
 
-To get started, simply clone the repo and run the setup bash script, which will take care of installing all packages/ dependencies and download data.
+To get started, simply clone the repo and run the setup bash script, which will take care of installing all packages and dependencies.
 
 ```
 git clone https://github.com/cvlab-epfl/MeshSDF.git
@@ -28,11 +28,10 @@ data/
           <instance_name>.obj
 ```
 
-We provide pre-processed and subsampled [ShapeNet](https://www.shapenet.org) data for cars and chairs to get you started. You should have downloaded it when running the setup script.
+We provide pre-processed and subsampled ShapeNet data for [cars](https://drive.google.com/file/d/1KCnZjWUuQQSGjc2C_Z0_j4IFBYmZ8GvG/view?usp=sharing) and [chairs](https://drive.google.com/file/d/1I05H7X8__jKak8OdwXPu7cD7BOF8mfa8/view?usp=sharing) to get you started. Simply download it and unzip it in the data/ folder to get going.
 
-Below we detail how to obtain and pre-process the ShapeNet data we used in our project.
+In case you are interested in using different data, below we detail how to obtain and pre-process the ShapeNet data we used in our project.
 Do not forget to cite the authors of the respective papers if you find this data useful for your research.
-
 
 ### Mesh data
 
@@ -77,17 +76,28 @@ python demo_optimizer.py -e experiments/bob_and_spot/ --fast
 
 ## Single-view reconstruction
 
-Coming soon!
+Once you have downloaded data, you can train a SVR model for cars by running
+
+```
+python train_svr.py -e experiments/cars_svr
+```
+
+
 
 ## Cite us
 
-If you find MeshSDF useful for your research, please cite the
-[pre-print](https://arxiv.org/abs/2006.03997):
+If you find MeshSDF useful for your research, please cite our
+[paper](https://arxiv.org/abs/2006.03997):
 ```
-@article{remelli2020meshsdf,
-  title={MeshSDF: Differentiable Iso-Surface Extraction},
-  author={Remelli, Edoardo and Lukoianov, Artem and Richter, Stephan R and Guillard, Beno{\^\i}t and Bagautdinov, Timur and Baque, Pierre and Fua, Pascal},
-  journal={arXiv preprint arXiv:2006.03997},
-  year={2020}
+@inproceedings{remelli2020meshsdf,
+ author = {Remelli, Edoardo and Lukoianov, Artem and Richter, Stephan and Guillard, Benoit and Bagautdinov, Timur and Baque, Pierre and Fua, Pascal},
+ booktitle = {Advances in Neural Information Processing Systems},
+ editor = {H. Larochelle and M. Ranzato and R. Hadsell and M. F. Balcan and H. Lin},
+ pages = {22468--22478},
+ publisher = {Curran Associates, Inc.},
+ title = {MeshSDF: Differentiable Iso-Surface Extraction},
+ url = {https://proceedings.neurips.cc/paper/2020/file/fe40fb944ee700392ed51bfe84dd4e3d-Paper.pdf},
+ volume = {33},
+ year = {2020}
 }
 ```

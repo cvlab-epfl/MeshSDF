@@ -352,60 +352,6 @@ def read_params(lines):
         params.append(param)
     return params
 
-def get_img_cam(param):
-    cam_mat, cam_pos = camera_info(degree2rad(param))
-    return cam_mat, cam_pos
-
-
-def camera_info(param):
-    az_mat = get_az(param[0])
-    el_mat = get_el(param[1])
-    inl_mat = get_inl(param[2])
-    cam_mat = np.transpose(np.matmul(np.matmul(inl_mat, el_mat), az_mat))
-    cam_pos = get_cam_pos(param)
-    return cam_mat, cam_pos
-
-
-def get_cam_pos(param):
-    camX = 0
-    camY = 0
-    camZ = param[3]
-    cam_pos = np.array([camX, camY, camZ])
-    return -1 * cam_pos
-
-
-def get_az(az):
-    cos = np.cos(az)
-    sin = np.sin(az)
-    mat = np.asarray([cos, 0.0, sin, 0.0, 1.0, 0.0, -1.0 * sin, 0.0, cos], dtype=np.float32)
-    mat = np.reshape(mat, [3, 3])
-    return mat
-
-
-def get_el(el):
-    cos = np.cos(el)
-    sin = np.sin(el)
-    mat = np.asarray([1.0, 0.0, 0.0, 0.0, cos, -1.0 * sin, 0.0, sin, cos], dtype=np.float32)
-    mat = np.reshape(mat, [3, 3])
-    return mat
-
-
-def get_inl(inl):
-    cos = np.cos(inl)
-    sin = np.sin(inl)
-    # zeros = np.zeros_like(inl)
-    # ones = np.ones_like(inl)
-    mat = np.asarray([cos, -1.0 * sin, 0.0, sin, cos, 0.0, 0.0, 0.0, 1.0], dtype=np.float32)
-    mat = np.reshape(mat, [3, 3])
-    return mat
-
-
-def degree2rad(params):
-    params_new = np.zeros_like(params)
-    params_new[0] = np.deg2rad(params[0] + 180.0)
-    params_new[1] = np.deg2rad(params[1])
-    params_new[2] = np.deg2rad(params[2])
-    return params_new
 
 def get_rotate_matrix(rotation_angle1):
     cosval = np.cos(rotation_angle1)
@@ -437,15 +383,6 @@ def get_rotate_matrix(rotation_angle1):
         [0, 0, 0, 1]
     ])
     return np.linalg.multi_dot([neg, rotation_matrix_z, rotation_matrix_z, scale_y_neg, rotation_matrix_x])
-
-def get_W2O_mat(shift):
-    T_inv = np.asarray(
-        [[1.0, 0., 0., shift[0]],
-         [0., 1.0, 0., shift[1]],
-         [0., 0., 1.0, shift[2]],
-         [0., 0., 0., 1.]]
-    )
-    return T_inv
 
 rot90y = np.array([[0, 0, -1],
                    [0, 1, 0],
