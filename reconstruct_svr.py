@@ -318,7 +318,7 @@ if __name__ == "__main__":
     )
     arg_parser.add_argument(
         "--resolution",
-        default=128,
+        default=256,
         help="Marching cubes resolution for reconstructed surfaces.",
     )
     arg_parser.add_argument(
@@ -329,4 +329,4 @@ if __name__ == "__main__":
     arg_parser.add_argument("--regularize", default=0.0, help="L2 regularization weight on latent vector")
 
     args = arg_parser.parse_args()
-    main_function(args.experiment_directory, args.continue_from, int(args.iterations), int(args.resolution), args.regularize)
+    main_function(args.experiment_directory, args.continue_from, int(args.iterations), int(args.resolution), float(args.regularize))
