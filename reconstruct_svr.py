@@ -124,7 +124,7 @@ def main_function(experiment_directory, continue_from,  iterations, marching_cub
         R_cuda = torch.tensor(extrinsic[:, 0:3, 0:3]).float().cuda().permute(0,2,1)
         t_cuda = torch.tensor(extrinsic[:, 0:3, 3]).float().cuda()
         lights = PointLights(device=device, location=[[0.0, 0.0, 3.0]])
-        cameras = PerspectiveCameras(device=device, focal_length=-K_cuda[:,0,0], principal_point=((K_cuda[:,0,2], K_cuda[:,1,2]),), image_size=((IMG_SIZE, IMG_SIZE),), R=R_cuda, T=t_cuda)
+        cameras = PerspectiveCameras(device=device, focal_length=-K_cuda[:,0,0] / K_cuda[:,0,2], image_size=((IMG_SIZE, IMG_SIZE),), R=R_cuda, T=t_cuda)
         raster_settings = RasterizationSettings(
             image_size=IMG_SIZE,
             blur_radius=0.000001,
